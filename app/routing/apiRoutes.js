@@ -12,7 +12,7 @@ module.exports = function (app) {
     })
 };
 
-// loop through array of friends object data to find the best match for currentUser
+// loop through array of friends object data to find the best match for currentUser(last push())
 function findFriend(friendsData) {
     var currentScores=friendsData[friendsData.length-1]["scores"];
     var resultIndex = -1;

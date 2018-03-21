@@ -10,4 +10,7 @@ app.use(bodyParser.json());
 require("./app/routing/apiRoutes.js")(app);
 require("./app/routing/htmlRoutes.js")(app);
 
-app.listen(PORT);
+app.listen(PORT,function(){
+    console.log("http://localhost:"+PORT);
+    console.log("https://lit-anchorage-89788.herokuapp.com/");
+});

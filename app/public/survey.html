@@ -94,7 +94,7 @@
         </form>
     </div>
     <script>
-        //our questionnaire databse
+        //our questionnaire list
         var arrQuestionnaire = ["Your mind is always buzzing with unexplored ideas and plans.",
             "Generally speaking, you rely more on your experience than your imagination.",
             "You find it easy to stay relaxed and focused even when there is some pressure.",
@@ -171,6 +171,7 @@
             }
         });
 
+        // when page loads
         $(document).on("click", "#btnSubmit", getAnswers);
         $('#modalResult').modal({ show: false });
 
