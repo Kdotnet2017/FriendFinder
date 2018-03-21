@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Survey - Friend Finder!</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style>
+        input[type="radio"] {
+            margin: 0 10px 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+                <nav class="navbar navbar-default">
+                    <ul class="nav nav-pills ">
+                        <li>
+                            <a href="/Home">Home</a>
+                        </li>
+                        <li>
+                            <a href="/Survey">Survey</a>
+                        </li>
+                        <li>
+                            <a href="/api/friends">API</a>
+                        </li>
+                        <div class="navbar-brand navbar-right">
+                            <span class="glyphicon glyphicon-king"></span>
+                        </div>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <form class="form-group" action="/api/friends" method="POST">
+            <div class="row">
+                <div class="col-sm-3"></div>
+                <div class="col-sm-6">
+                    <div class="panel panel-info">
+                        <div class="panel-heading ">
+                            <h5>YOU
+                                <span class="text-info small">
+                                    <code>All Required</code>
+                                </span>
+                            </h5>
+                        </div>
+                        <div class="panel-body">
+                            <div class="input-group input-group-lg">
+                                <label for="fullName" class="input-group-addon">Full Name</label>
+                                <input id="fullName" type="text" class="form-control" placeholder="John Smith" required="required">
+                            </div>
+                            <hr>
+                            <div class="input-group input-group-lg">
+                                <label for="imageUrl" class="input-group-addon">Image Url</label>
+                                <input id="imageUrl" type="text" class="form-control" placeholder="https://media.licdn.com/3435aa3.jpg" required="required">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-1"></div>
+                <div class="col-sm-10">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <h5>Questions:
+                                <span class="text-info small">
+                                    <code>All Required</code>
+                                </span>
+                            </h5>
+                        </div>
+                        <div class="panel-body" id="questionnaireDiv">
+                            <!-- questionnaire comes here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-5"></div>
+                <div class="col-sm-2">
+                    <button type="submit" id="btnSubmit" class="btn btn-primary input-group btn-lg submit">Submit</button>
+                    <br>
+                    <br>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+        //our questionnaire databse
+        var arrQuestionnaire = ["Your mind is always buzzing with unexplored ideas and plans.",
+            "Generally speaking, you rely more on your experience than your imagination.",
+            "You find it easy to stay relaxed and focused even when there is some pressure.",
+            "You rarely do something just out of sheer curiosity.",
+            "People can rarely upset you.",
+            "It is often difficult for you to relate to other people’s feelings.",
+            "In a discussion, truth should be more important than people’s sensitivities.",
+            "You rarely get carried away by fantasies and ideas.",
+            "You think that everyone’s views should be respected regardless of whether they are supported by facts or not.",
+            "You feel more energetic after spending time with a group of people.",
+        ];
+        // callback for btnSubmit event listener
+        function getAnswers(event) {
+            event.preventDefault();
+            // store the scores
+            var newFriend = { name: "", photo: "", scores: [] };
+            for (var i = 1; i < arrQuestionnaire.length + 1; i++) {
+                var idElement = "Q" + i.toString();
+                var idElementValue = $("input:radio[name='" + idElement + "']:checked").val();
+                if (idElementValue) {
+                    newFriend.scores.push(parseInt(idElementValue));
+                }
+                else {
+                    alert("You need to answer all questions.");
+                    return false;
+                }
+            }
+            if ($("#fullName").val() && $("#imageUrl").val()) {
+                var userImageUrlInput = $("#imageUrl").val();
+                if (userImageUrlInput.toLowerCase().includes(".jpg") || userImageUrlInput.toLowerCase().includes(".png") || userImageUrlInput.toLowerCase().includes(".gif")) {
+                    newFriend.name = $("#fullName").val();
+                    newFriend.photo = $("#imageUrl").val();
+                }
+                else {
+                    alert("You need to eneter image url.");
+                    return false;
+                }
+            }
+            else {
+                alert("Full Name and image URL are  required.");
+                return false;
+            }
+
+            $.post("/api/friends", newFriend, function (data) {
+                if (data) {
+                    // display the modal
+                    $("#newName").text(data.name);
+                    $("#newPhoto").attr("src", data.photo);
+                    $('#modalResult').modal('show');
+                    // clearing the form
+                    $("#fullName").val("");
+                    $("#imageUrl").val("");
+                    for (var i = 1; i < arrQuestionnaire.length + 1; i++) {
+                        $('input[name="Q' + i.toString() + '"]').prop('checked', false);
+                    }
+                }
+            });
+        }
+        // generating the questionnaire form
+        $(document).ready(function () {
+            for (var i = 1; i < 11; i++) {
+                var questionnaire = $("#questionnaireDiv");
+                questionnaire.append(`
+             <h4>Question `+ i.toString() + `)</h4>
+                                <h3>`+ arrQuestionnaire[i - 1] + `</h3>
+                                <input type='radio' name='Q`+ i.toString() + `' value='1'><span>1</span>
+                                <input type='radio' name='Q`+ i.toString() + `' value='2'><span>2</span>
+                                <input type='radio' name='Q`+ i.toString() + `' value='3'><span>3</span>
+                                <input type='radio' name='Q`+ i.toString() + `' value='4'><span>4</span>
+                                <input type='radio' name='Q`+ i.toString() + `' value='5'><span>5</span>
+                                <span class="text-info small"><code>1(Strongly Disagree) - 5(Strongly Agree)</code></span>
+                                <hr>
+            `);
+            }
+        });
+
+        $(document).on("click", "#btnSubmit", getAnswers);
+        $('#modalResult').modal({ show: false });
+
+
+
+    </script>
+    <!-- Modal -->
+    <div id="modalResult" class="modal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Your New Friend is:</h4>
+                </div>
+                <div class="modal-body">
+                    <h2 id="newName"></h2>
+                    <img id="newPhoto" src="" alt="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
